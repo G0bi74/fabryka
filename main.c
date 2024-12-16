@@ -1,12 +1,12 @@
 #include <iomanip>
 #include <iostream>
 
-void merge(float arr[], int left, int mid, int right) {
+void merge(int arr[], int left, int mid, int right, int exp) {
     int n1 = mid - left + 1;
     int n2 = right - mid;
 
-    float* L = new float[n1];
-    float* R = new float[n2];
+    int* L = new int[n1];
+    int* R = new int[n2];
 
     for (int i = 0; i < n1; ++i)
         L[i] = arr[left + i];
@@ -15,7 +15,7 @@ void merge(float arr[], int left, int mid, int right) {
 
     int i = 0, j = 0, k = left;
     while (i < n1 && j < n2) {
-        if (L[i] <= R[j]) {
+        if (L[i] / exp <= R[j] / exp) {
             arr[k] = L[i];
             ++i;
         } else {
@@ -41,26 +41,26 @@ void merge(float arr[], int left, int mid, int right) {
 }
 
 
-void mergeSort(float arr[], int left, int right) {
+void mergeSort(int arr[], int left, int right, int exp) {
     if (left < right) {
         int mid = left + (right - left) / 2;
 
-        mergeSort(arr, left, mid);
-        mergeSort(arr, mid + 1, right);
+        mergeSort(arr, left, mid, exp);
+        mergeSort(arr, mid + 1, right, exp);
 
-        merge(arr, left, mid, right);
+        merge(arr, left, mid, right, exp);
     }
 }
 
 class MyList {
 private:
-    float *list;
+    int *list;
     int size;
     int capacity;
 
     void Resize() {
         capacity *= 2;
-        float* new_list = new float[capacity];
+        int* new_list = new int[capacity];
         for (int i = 0; i < size; i++) {
             new_list[i] = list[i];
         }
@@ -70,19 +70,19 @@ private:
 
 public:
     MyList(int n) : size(0), capacity(n) {
-        list = new float[n];
+        list = new int[n];
     }
     ~MyList() {
         delete[] list;
     }
 
-    void Addlast(float val) {
+    void Addlast(int val) {
         if (size == capacity) {
             Resize();
         }
         list[size++] = val;
     }
-    float* Front() {
+    int* Front() {
         return list;
     }
     int GetSize() const {
@@ -94,9 +94,9 @@ public:
             std::cout << list[i] << " ";
         }std::cout << "\n";
     }
-    float FindMax() {
-        float max= 0;
-        float last = list[size - 1];
+    float FindMaxDiff() {
+        int max= 0;
+        int last = list[size - 1];
         for (int i = size-2; i >= 0; i--) {
             if (max < last - list[i] ) {
                 max = last - list[i];
@@ -105,7 +105,25 @@ public:
         }
         return max;
     }
+    int getMax() {
+        int max = 0;
+        for (int i = 0; i < size; i++) {
+            if (max < list[i]) {
+                max = list[i];
+            }
+        }return max;
+    }
+
+    void radixsort()
+    {
+        int m = getMax();
+
+        for (int exp = 1; m / exp > 0; exp *= 10)
+            mergeSort(list, 0, size - 1, exp);
+    }
+
 };
+
 
 
 int main() {
@@ -118,12 +136,14 @@ int main() {
     MyList list(n);
     for (int i = 0; i < n; i++) {
         float val;
-        std::cin >> val;
-        list.Addlast(val);
+        std::cin >> val ;
+        int x = val * 10000;
+        list.Addlast(x);
     }
-    mergeSort(list.Front(),0, list.GetSize()-1 );
 
     //list.PrintList();
-    std::cout << std::setprecision(4) << std::fixed << list.FindMax();
+    list.radixsort();
+    //list.PrintList();
+    std::cout << std::setprecision(4) << std::fixed << list.FindMaxDiff() / 10000;
     return 0;
 }
